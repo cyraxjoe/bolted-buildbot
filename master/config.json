@@ -1,0 +1,8 @@
+{
+  "port": 9989,
+  "webUIport": 8010,
+  "masterSrc": {
+    "type": "directory",    
+    "args": "/tmp/myci"
+  }
+}

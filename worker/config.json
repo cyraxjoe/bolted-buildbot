@@ -1,0 +1,9 @@
+{
+  "name": "default",
+  "admin": "Worker Admin <noreply@example.com>",
+  "description": "Bolted Buildbot Worker default",
+  "master": {
+    "host": "localhost",
+    "port": 9989
+  }
+}
