@@ -9,6 +9,7 @@
 , externalMasterDir
 , shellMode
 , masterConfigFile
+, masterSrc
 }:
 
 let 
@@ -32,17 +33,18 @@ with {
     abort "Missing required 'port' in the config file.";
   assert missingAttr "webUIport" config -> 
     abort "Missing required 'webUIport' in the config file.";
-  assert missingAttr "masterSrc" config -> 
+  assert (missingAttr "masterSrc" config && masterSrc == null) -> 
     abort "Missing required 'masterSrc' in the config file.";
 let
   BBBMaster = with rec {
     coerceToString = prop: with builtins; if (typeOf prop) == "int" then toString prop else prop;
     masterPortStr = coerceToString config.port;
     masterUIPortStr = coerceToString config.webUIport;
-    masterSrcConfig = config.masterSrc;
+    masterSrcConfig = if masterSrc == null  then config.masterSrc else null;
     params = { inherit 
       copyPathToStore
       writeShellScriptBin buildbot-full shellMode
+      masterSrc
       masterSrcConfig externalMasterDir masterPortStr masterUIPortStr;
     };
   }; import ./core-master-setup.nix params;

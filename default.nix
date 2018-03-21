@@ -1,5 +1,6 @@
 { nixpkgs ? <nixpkgs>
 , shellMode ? false
+, masterSrc ? null
 , masterConfigFile ? null
 , externalMasterDir ? null
 , externalWorkerDir ? null
@@ -11,7 +12,7 @@ let
   # ^ base libaries ^
 
   callPackage = callPackageWith pkgs;
-  baseMaster = callPackage ./master ({ inherit shellMode;  } //
+  baseMaster = callPackage ./master ({ inherit shellMode masterSrc;  } //
     (optionalAttrs (masterConfigFile != null) { inherit masterConfigFile;} ) //
     # remove trailing slash 
     (optionalAttrs (externalMasterDir != null) { externalMasterDir = removeSuffix "/" externalMasterDir;} ));

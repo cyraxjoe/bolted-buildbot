@@ -2,6 +2,7 @@
 , writeShellScriptBin
 , buildbot-full
 , shellMode
+, masterSrc
 , masterSrcConfig
 , externalMasterDir
 , masterPortStr
@@ -9,15 +10,16 @@
 }:
 let
   buildbotPath = "${buildbot-full}/bin/buildbot"; 
-  inherit (builtins) hasAttr getAttr toPath pathExists;
+  inherit (builtins) typeOf hasAttr getAttr toPath pathExists;
 in 
 assert (shellMode == false && externalMasterDir == null)  -> 
   abort "Missing required externalMasterDir parameter";
-assert !(hasAttr "type" masterSrcConfig) ->
+
+assert (masterSrcConfig != null) &&  !(hasAttr "type" masterSrcConfig) ->
   abort "Missing required property 'type' in the masterSrc property";
 
-assert with masterSrcConfig; 
-      (type != "directory") && (type != "fetchurl") ->
+assert (masterSrcConfig != null) && 
+       (with masterSrcConfig; (type != "directory") && (type != "fetchurl")) ->
   abort "Invalid type of '${ masterSrcConfig.type }'";
 
 let 
@@ -25,12 +27,11 @@ let
      directory = args:  copyPathToStore args;
      fetchurl = args: args; # do something with fetchurl;
   };
-  masterSrc = with masterSrcConfig; ((getAttr type masterSrcBuilders) args);
+  masterSrc' = with masterSrcConfig; ((getAttr type masterSrcBuilders) args);
+
 in
-
-
-rec {
-  inherit externalMasterDir masterSrc;
+({ masterSrc = if masterSrc  == null then masterSrc' else masterSrc; } // rec {
+  inherit externalMasterDir;
   externalSetupName = "_bbb-master-setup";
   externalSetupScript = ./scripts/external-master-setup.sh;
   installPhase = with rec {
@@ -68,4 +69,4 @@ rec {
           --set ORIGIN $out
 
   '';
-}
+})
