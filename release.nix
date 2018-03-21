@@ -7,7 +7,7 @@ let
   masterConfigDrv = with (import nixpkgs {});
   stdenv.mkDerivation {
      name = "master-config";
-     src = copyPathToStore masterConfig;
+     src = masterConfig;
      phases = [ "buildPhase" ];
      buildPhase = ''
        mkdir $out
