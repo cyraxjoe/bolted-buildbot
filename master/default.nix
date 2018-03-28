@@ -1,23 +1,30 @@
 { callPackage
-, buildbot-full
+, buildbot
 , buildbot-worker
+, buildbot-plugins
 , shellMode ? false
 , externalMasterDir ? null
 , masterSrc ? null
 , masterConfigFile ? ./config.json
 }:
 
-rec {
-  regular = callPackage ./regular.nix { 
-    inherit shellMode masterSrc masterConfigFile externalMasterDir;
-  };
+let
+  extraPlugins = callPackage ./plugins.nix {};
 
-  with-local-workers = 
-    let
+  buildbotFull = buildbot.withPlugins (
+    with buildbot-plugins; 
+    [ www console-view waterfall-view grid-view wsgi-dashboards extraPlugins.badges ]);
+
+  buildbotFullWithWorker = buildbotFull.overrideAttrs (old: {
+     propagatedBuildInputs = old.propagatedBuildInputs ++ [ buildbot-worker ];
+  });
+in  {
+  regular = callPackage ./regular.nix { 
+    inherit buildbotFull shellMode masterSrc masterConfigFile externalMasterDir; };
+
+  with-local-workers = let
     masterWithWorker = callPackage ./regular.nix { 
-      buildbot-full = buildbot-full.overrideAttrs (old: {
-        propagatedBuildInputs = old.propagatedBuildInputs ++ [ buildbot-worker ];
-      });
+      buildbotFull = buildbotFullWithWorker;
       inherit shellMode masterSrc masterConfigFile externalMasterDir;
     };
     in 

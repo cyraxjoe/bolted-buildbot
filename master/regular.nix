@@ -1,11 +1,12 @@
 { stdenv
+, callPackage
 , copyPathToStore
 , lib
 , runCommand
 , writeShellScriptBin
 , makeWrapper
-, buildbot-full
 # custom params
+, buildbotFull
 , externalMasterDir
 , shellMode
 , masterConfigFile
@@ -15,7 +16,7 @@
 let 
   inherit(lib) getVersion versionAtLeast importJSON;
   minVersion = "1.0"; 
-  currentVersion = getVersion buildbot-full.name;
+  currentVersion = getVersion buildbotFull.name;
 in
   assert !(versionAtLeast currentVersion  minVersion) -> 
     abort ''
@@ -36,6 +37,7 @@ with {
   assert (missingAttr "masterSrc" config && masterSrc == null) -> 
     abort "Missing required 'masterSrc' in the config file.";
 let
+
   BBBMaster = with rec {
     coerceToString = prop: with builtins; if (typeOf prop) == "int" then toString prop else prop;
     masterPortStr = coerceToString config.port;
@@ -43,7 +45,9 @@ let
     masterSrcConfig = if masterSrc == null  then config.masterSrc else null;
     params = { inherit 
       copyPathToStore
-      writeShellScriptBin buildbot-full shellMode
+      writeShellScriptBin
+      buildbotFull
+      shellMode
       masterSrc
       masterSrcConfig externalMasterDir masterPortStr masterUIPortStr;
     };
@@ -57,7 +61,7 @@ stdenv.mkDerivation (BBBMaster // rec {
   name = "bbb-master-${version}";
   version = "0.0.1";
   src = ./.;
-  buildInputs = [ buildbot-full makeWrapper ];
+  buildInputs = [ buildbotFull makeWrapper ];
   passthru = {
     init-master = BBBInit;
   };

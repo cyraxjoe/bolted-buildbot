@@ -1,8 +1,14 @@
-{ nixpkgs
-, bbb
+{ nixpkgs ? <nixpkgs>
 , masterSrc
-, externalMasterDir
+, externalMasterDir ? "/tmp/ci"
+, bbb ? ./.
 }:
-{
-  inherit (import bbb { inherit nixpkgs masterSrc externalMasterDir; }) lw-master;
+let
+  masterSrc' = with (import nixpkgs {});
+  (if lib.hasPrefix "/nix/store" masterSrc
+    then masterSrc
+  else
+    copyPathToStore masterSrc);
+in {
+  inherit (import bbb { masterSrc=masterSrc'; inherit nixpkgs externalMasterDir; }) lw-master;
 }

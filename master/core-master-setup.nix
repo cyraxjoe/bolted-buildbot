@@ -1,6 +1,6 @@
 { copyPathToStore
 , writeShellScriptBin
-, buildbot-full
+, buildbotFull
 , shellMode
 , masterSrc
 , masterSrcConfig
@@ -9,7 +9,7 @@
 , masterUIPortStr
 }:
 let
-  buildbotPath = "${buildbot-full}/bin/buildbot"; 
+  buildbotPath = "${ buildbotFull }/bin/buildbot"; 
   inherit (builtins) typeOf hasAttr getAttr toPath pathExists;
 in 
 assert (shellMode == false && externalMasterDir == null)  -> 

@@ -12,10 +12,12 @@ let
   # ^ base libaries ^
 
   callPackage = callPackageWith pkgs;
+
   baseMaster = callPackage ./master ({ inherit shellMode masterSrc;  } //
     (optionalAttrs (masterConfigFile != null) { inherit masterConfigFile;} ) //
     # remove trailing slash 
     (optionalAttrs (externalMasterDir != null) { externalMasterDir = removeSuffix "/" externalMasterDir;} ));
+
 in {
   master = baseMaster.regular;
   # master with local workers
