@@ -1,10 +1,11 @@
 { buildbot-worker
 , writeShellScriptBin
 # worker specific params
+, bigErrorMsg
 , externalWorkerDir
 , config }:
 assert (externalWorkerDir == null)  -> 
-   abort "Missing required externalWorkerDir parameter";
+   abort (bigErrorMsg "Missing required externalWorkerDir parameter");
 rec {
   inherit externalWorkerDir;
   externalSetupName = "_bbb-worker-${ config.name }-setup";

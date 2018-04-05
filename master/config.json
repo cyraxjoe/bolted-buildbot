@@ -1,8 +1,10 @@
 {
   "port": 9989,
   "webUIport": 8010,
-  "masterSrc": {
-    "type": "directory",    
-    "args": "/tmp/myci"
-  }
+  "plugins": [
+    "www",
+    "console-view",
+    "waterfall-view",
+    "grid-view"
+  ]
 }

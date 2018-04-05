@@ -1,3 +1,6 @@
+##
+# Buildbot plugins not already packaged in nixpkgs.
+##
 { stdenv
 , python27Packages
 , buildbot-pkg }:
@@ -27,7 +30,6 @@ let
       description = "SVG converter based on Cairo";
     };
   };
-
 in
 {
   badges = buildPythonPackage rec {

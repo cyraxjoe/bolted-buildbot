@@ -1,14 +1,29 @@
 { nixpkgs ? <nixpkgs>
-, masterSrc
+, masterSrc  ? null
+, masterConfigFile  ? null
+, masterPlugins ? null
 , externalMasterDir ? "/tmp/ci"
+, externalWorkerDir ? null
+, workerConfigFile ? null
 , bbb ? ./.
 }:
 let
-  masterSrc' = with (import nixpkgs {});
-  (if lib.hasPrefix "/nix/store" masterSrc
-    then masterSrc
-  else
-    copyPathToStore masterSrc);
+  pkgs = import nixpkgs {}; 
+  inherit(pkgs) copyPathToStore;
+  inherit(pkgs.lib) isStorePath optionalAttrs;
+
+  masterSrc' = (if isStorePath masterSrc
+                 then masterSrc
+               else
+                 copyPathToStore masterSrc);
+  params =  { inherit 
+    nixpkgs masterConfigFile masterPlugins 
+    externalMasterDir externalWorkerDir workerConfigFile;
+  };
+  B3 = import bbb (
+    params  // (optionalAttrs (masterSrc != null) { masterSrc = masterSrc'; })
+  ); 
+
 in {
-  inherit (import bbb { masterSrc=masterSrc'; inherit nixpkgs externalMasterDir; }) lw-master;
+  inherit (B3) master-regular master-lw worker;
 }

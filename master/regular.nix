@@ -1,64 +1,55 @@
 { stdenv
 , callPackage
-, copyPathToStore
 , lib
-, runCommand
-, writeShellScriptBin
 , makeWrapper
 # custom params
+, utilFuncs
 , buildbotFull
 , externalMasterDir
-, shellMode
 , masterConfigFile
 , masterSrc
 }:
-
 let 
   inherit(lib) getVersion versionAtLeast importJSON;
+  inherit(builtins) typeOf hasAttr tryEval;
+  inherit(utilFuncs) coerceToString missingAttr bigErrorMsg;
+
   minVersion = "1.0"; 
   currentVersion = getVersion buildbotFull.name;
-in
-  assert !(versionAtLeast currentVersion  minVersion) -> 
-    abort ''
-    #########################################################
-    The buildbot master in nixpkgs needs to be at least at version ${minVersion}.
-
-    Current version: ${currentVersion}
-    ##########################################################
-  '';
-with {
   config = importJSON masterConfigFile;
-  missingAttr = a: config: !(builtins.hasAttr a config);
-};
-  assert missingAttr "port" config -> 
-    abort "Missing required 'port' in the config file.";
-  assert missingAttr "webUIport" config -> 
-    abort "Missing required 'webUIport' in the config file.";
-  assert (missingAttr "masterSrc" config && masterSrc == null) -> 
-    abort "Missing required 'masterSrc' in the config file.";
-let
+in
+  assert !(versionAtLeast currentVersion  minVersion) ->
+    abort (bigErrorMsg ''
+      The buildbot master in nixpkgs needs to be at least at version ${ minVersion }.
 
-  BBBMaster = with rec {
-    coerceToString = prop: with builtins; if (typeOf prop) == "int" then toString prop else prop;
-    masterPortStr = coerceToString config.port;
-    masterUIPortStr = coerceToString config.webUIport;
-    masterSrcConfig = if masterSrc == null  then config.masterSrc else null;
-    params = { inherit 
-      copyPathToStore
-      writeShellScriptBin
-      buildbotFull
-      shellMode
-      masterSrc
-      masterSrcConfig externalMasterDir masterPortStr masterUIPortStr;
-    };
-  }; import ./core-master-setup.nix params;
-  BBBInit = import ./init-master.nix { 
-      inherit(lib) getAttr;
-      inherit stdenv makeWrapper writeShellScriptBin;
+      Current version: ${ currentVersion }
+    '');
+
+  assert missingAttr "port" config -> 
+    abort (bigErrorMsg "Missing required 'port' in the config file");
+
+  assert missingAttr "webUIport" config -> 
+    abort (bigErrorMsg "Missing required 'webUIport' in the config file");
+
+let
+  # main attributes of the master.
+  #
+  # note that we are not using callPackage on purpose, the function
+  # assumes that the return value is a derivation and includes 
+  # override and overrideDerivation, in this case we just want to
+  # obtain the plain attribute set
+  BBBMaster = import ./core-master-setup.nix { 
+    inherit lib bigErrorMsg buildbotFull masterSrc externalMasterDir;
+    masterPortStr = (coerceToString config.port);
+    masterUIPortStr = (coerceToString config.webUIport);
   };
-in 
+
+  # init package
+  BBBInit = callPackage ./init-master.nix { };
+in
+
 stdenv.mkDerivation (BBBMaster // rec {
-  name = "bbb-master-${version}";
+  name = "bbb-regular-master-${ version }";
   version = "0.0.1";
   src = ./.;
   buildInputs = [ buildbotFull makeWrapper ];

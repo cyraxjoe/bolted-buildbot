@@ -3,27 +3,33 @@
 , writeShellScriptBin
 , makeWrapper
 , buildbot-worker
+, utilFuncs
 , externalWorkerDir 
 , workerConfigFile ? ./config.json }:
-let minVersion = "1.0"; in
-  assert !(lib.versionAtLeast  buildbot-worker.version  minVersion) -> 
-    abort ''
+let 
+  inherit(lib) importJSON versionAtLeast;
+  inherit(utilFuncs) missingAttr bigErrorMsg;
+  minVersion = "1.0"; 
+  config = importJSON workerConfigFile;
+in
+  assert !(versionAtLeast  buildbot-worker.version  minVersion) -> 
+    abort (bigErrorMsg ''
     #########################################################
     The buildbot worker in nixpkgs needs to be at least at version ${minVersion}.
 
     Current version: ${buildbot-worker.version}
     ##########################################################
-  '';
-with {
-  config = lib.importJSON workerConfigFile;
-  missingAttr = a: config: !(builtins.hasAttr a config);
-};
+  '');
+
   assert missingAttr "name" config -> 
-    abort "Missing required 'name' in the config file.";
+    abort (bigErrorMsg "Missing required 'name' in the config file.");
+
   assert missingAttr "admin" config -> 
-    abort "Missing required 'admin' in the config file.";
+    abort ("Missing required 'admin' in the config file.");
+
   assert missingAttr "description" config -> 
-    abort "Missing required 'description' in the config file.";
+    abort ("Missing required 'description' in the config file.");
+
 with rec {
   # allow_shutdown:  Allows the worker to initiate a graceful shutdown. One of 'signal' or 'file'
   # keepalive:       Interval at which keepalives should be sent (in seconds) [default: 600]
@@ -44,6 +50,7 @@ with rec {
       port = 9989;
     };
   };
+
   params = { 
     config = 
       with builtins;
@@ -57,7 +64,7 @@ with rec {
            let coerceFunc = getAttr (typeOf value) coerceMap;
            in coerceFunc value)
       (defaultConfig // config);
-    inherit  buildbot-worker writeShellScriptBin externalWorkerDir;
+    inherit bigErrorMsg buildbot-worker writeShellScriptBin externalWorkerDir;
   };
 }; 
 let
