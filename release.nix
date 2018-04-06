@@ -1,9 +1,9 @@
 { nixpkgs ? <nixpkgs>
-, masterSrc  ? null
-, masterConfigFile  ? null
+, masterSrc ? null
+, masterConfigFile ? null
 , masterPlugins ? null
-, externalMasterDir ? "/tmp/ci"
-, externalWorkerDir ? null
+, externalMasterDir ? "/tmp/bbb-master"
+, externalWorkerDir ? "/tmp/bbb-worker"
 , workerConfigFile ? null
 , bbb ? ./.
 }:
