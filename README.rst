@@ -34,26 +34,26 @@ the parameters in the nix expression.
 
 Parameters:
 
-  nixpkgs
-    It should point to a checkout of `nixpkgs <https://github.com/nixos/nixpkgs>`_ 
-    preferably to a recent stable release like: `18.03 <https://github.com/nixos/nixpkgs-channels/tree/nixos-18.03>`_. By default it will try to use the envvar ``NIX_PATH`` for ``<nixpkgs>``.
+nixpkgs
+  It should point to a checkout of `nixpkgs <https://github.com/nixos/nixpkgs>`_ 
+  preferably to a recent stable release like: `18.03 <https://github.com/nixos/nixpkgs-channels/tree/nixos-18.03>`_. By default it will try to use the envvar ``NIX_PATH`` for ``<nixpkgs>``.
 
-  masterSrc
-    The master source. Default to ``null``.
+masterSrc
+  The master source. Default to ``null``.
 
-  masterConfigFile
-    Master config file in JSON format. Default to ``null``.
+masterConfigFile
+  Master config file in JSON format. Default to ``null``.
 
-  masterPlugins
-    Master buildbot plugins. Default to ``[ "www" "console-view" "waterfall-view" "grid-view" "wsgi-dashboards" "badges" ]``.
+masterPlugins
+  Master buildbot plugins. Default to ``[ "www" "console-view" "waterfall-view" "grid-view" "wsgi-dashboards" "badges" ]``.
 
-  externalMasterDir
-    Base directory on which the Master Bolted Buildbot would be deployed. Default to ``/tmp/bbb-master``.
+externalMasterDir
+  Base directory on which the Master Bolted Buildbot would be deployed. Default to ``/tmp/bbb-master``.
 
-  externalWorkerDir
-    Base directory on which the Worker Bolted Buildbot would be deployed. Default to ``/tmp/bbb-worker``.
+externalWorkerDir
+  Base directory on which the Worker Bolted Buildbot would be deployed. Default to ``/tmp/bbb-worker``.
 
-  workerConfigFile
-    Worker config file in JSON format. Default to ``null``
+workerConfigFile
+  Worker config file in JSON format. Default to ``null``
 
 
